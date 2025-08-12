@@ -155,13 +155,14 @@ import os
 
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173"
+    "http://localhost:5173,http://127.0.0.1:5173,https://professional-ai-delta.vercel.app"
 )
 origins = [o.strip() for o in ALLOWED_ORIGINS.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,                    # explicit domains (local + prod)
+    allow_origin_regex=r"https://.*\.vercel\.app",  # ✅ all Vercel previews
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

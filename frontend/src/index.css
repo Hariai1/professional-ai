@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ✅ Plain white-bordered table style */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid white;
+}
+
+.prose table th,
+.prose table td {
+  border: 1px solid white;
+  color: white;
+  padding: 4px;
+  text-align: left;
+  background-color: transparent !important;
+}
+
+/* Optional: force no background anywhere */
+.prose table tr {
+  background-color: transparent !important;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}

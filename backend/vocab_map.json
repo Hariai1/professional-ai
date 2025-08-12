@@ -1,0 +1,14 @@
+{
+  "CA Final": {
+    "Financial Reporting": {
+      "Inventories": {
+        "cost formulas": ["fifo", "weighted average", "specific identification"],
+        "net realizable value": ["nrv", "lower of cost and nrv", "inventory valuation"],
+        "inventory valuation": ["cost or net realizable value", "valuation methods"],
+        "perpetual": ["continuous recording", "real-time inventory"],
+        "periodic": ["count-based", "physical verification"],
+        "ind as 2": ["valuation of inventories", "accounting standard", "cost components"]
+      }
+    }
+  }
+}

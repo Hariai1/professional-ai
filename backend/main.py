@@ -145,6 +145,10 @@ print("🔑 Weaviate URL:", WEAVIATE_URL)
 
 # ✅ Initialize FastAPI app
 app = FastAPI()
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 
 # ✅ Enable CORS for frontend access
 app.add_middleware(

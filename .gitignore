@@ -16,3 +16,6 @@ backend/__pycache__/
 # IDE
 .vscode/
 .idea/
+
+# Archives
+*.zip

@@ -149,11 +149,19 @@ app = FastAPI()
 def health():
     return {"status": "ok"}
 
+# ---- CORS (env-driven, supports dev + prod) ----
+from fastapi.middleware.cors import CORSMiddleware
+import os
 
-# ✅ Enable CORS for frontend access
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173"
+)
+origins = [o.strip() for o in ALLOWED_ORIGINS.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # You can restrict this to your frontend later
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -205,28 +213,34 @@ def read_root():
 async def test_connections():
     results = {}
 
-    # ✅ MongoDB test
+    # Mongo
     try:
         await client_mongo.admin.command("ping")
         results["mongo"] = "connected"
     except Exception as e:
-        results["mongo"] = f"failed: {str(e)}"
+        results["mongo"] = f"failed: {e}"
 
-    # ✅ Weaviate test
+    # Weaviate (QB)
     try:
-        weaviate_ready = client_weaviate.is_ready()
-        results["weaviate_ready"] = weaviate_ready
+        results["weaviate_qb_ready"] = client_weaviate_qb.is_ready()
     except Exception as e:
-        results["weaviate_ready"] = f"failed: {str(e)}"
+        results["weaviate_qb_ready"] = f"failed: {e}"
 
-    # ✅ OpenAI test
-    try:
-        results["openai_key_start"] = OPENAI_API_KEY[:8]
-    except Exception as e:
-        results["openai_key_start"] = f"failed: {str(e)}"
+    # Weaviate (RAG clusters)
+    for name, cli in {
+        "weaviate_ca": client_weaviate_rag,
+        "weaviate_cma": client_weaviate_rag_cma,
+        "weaviate_cs": client_weaviate_rag_cs,
+    }.items():
+        try:
+            results[f"{name}_ready"] = cli.is_ready()
+        except Exception as e:
+            results[f"{name}_ready"] = f"failed: {e}"
+
+    # OpenAI
+    results["openai_key_start"] = (OPENAI_API_KEY or "")[:8]
 
     return results
-    
 
 def normalize_tokens(text):
     return [token.lemma_.lower() for token in nlp(text) if not token.is_stop and not token.is_punct]
@@ -559,8 +573,6 @@ async def upload_images(
 
     return {"message": "Images uploaded", "urls": uploaded_urls}
 
-from fastapi import Body
-import httpx  # ✅ Make sure httpx is installed: `pip install httpx`
 
 class AIRequest(BaseModel):
     query: str
@@ -860,7 +872,7 @@ async def get_search_history(user_id: str = Query(...)):
             "level": item["level"],
             "subject": item["subject"],
             "chapter": item["chapter"],
-            "timestamp": item["timestamp"].strftime("%Y-%m-%d %H:%M")
+            "timestamp": item["timestamp"].strftime("%Y-%m-%d %H:%M"),
         }
         for item in history
     ]
